@@ -1,0 +1,26 @@
+{
+  "name": "个人节律",
+  "short_name": "节律",
+  "description": "根据个人时间、目标和生活约束生成每日 ToDo，并支持完成勾选与提醒。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f3f5f2",
+  "theme_color": "#176a58",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,2629 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人节律 ToDo</title>
+  <meta name="theme-color" content="#176a58">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="节律">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <style>
+    :root {
+      --bg: #f3f5f2;
+      --surface: #ffffff;
+      --surface-alt: #f8faf7;
+      --ink: #17211d;
+      --muted: #5e6964;
+      --line: #d5ddd8;
+      --line-strong: #aebbb4;
+      --accent: #176a58;
+      --accent-soft: #e5f1ed;
+      --study: #315d8a;
+      --study-soft: #e8eff7;
+      --sport: #aa5b25;
+      --sport-soft: #f7ece4;
+      --life: #7a5a18;
+      --life-soft: #f7f1df;
+      --danger: #953f3f;
+      --shadow: 0 12px 30px rgba(27, 42, 35, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .profile-panel {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 20px 30px;
+      overflow-y: auto;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .brand-mark {
+      display: grid;
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 760;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .profile-section {
+      padding: 15px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .profile-section h2 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 11px;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: #ffffff;
+      color: var(--ink);
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    input,
+    select {
+      min-height: 39px;
+      padding: 8px 10px;
+    }
+
+    textarea {
+      min-height: 76px;
+      padding: 9px 10px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(23, 106, 88, 0.11);
+      outline: none;
+    }
+
+    .check-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      min-height: 28px;
+      align-items: center;
+    }
+
+    .check-row label {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      margin: 0;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .check-row input {
+      width: 16px;
+      min-height: auto;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
+    .profile-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .notification-status {
+      grid-column: 1 / -1;
+      padding: 9px 10px;
+      border-radius: 7px;
+      background: var(--surface-alt);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .button {
+      min-height: 39px;
+      padding: 8px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+      transition: border-color 140ms ease, background 140ms ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .button.primary:hover,
+    .button.primary:focus-visible {
+      background: #115846;
+    }
+
+    .button.danger {
+      color: var(--danger);
+    }
+
+    .button.ghost {
+      border-color: transparent;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .workspace {
+      min-width: 0;
+      padding: 24px clamp(18px, 4vw, 52px) 56px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: clamp(24px, 3.4vw, 38px);
+      line-height: 1.12;
+    }
+
+    .topbar p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .date-control {
+      flex: 0 0 auto;
+      min-width: 176px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+
+    .tabs button {
+      flex: 0 0 auto;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .tabs button.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .overview {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .overview-main,
+    .summary,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .overview-main {
+      padding: clamp(20px, 3vw, 30px);
+    }
+
+    .overview-main .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .overview-main h3 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.18;
+    }
+
+    .overview-main > p:last-child {
+      max-width: 760px;
+      margin: 12px 0 0;
+      color: var(--muted);
+    }
+
+    .summary {
+      display: grid;
+      gap: 12px;
+      padding: 20px;
+      background: var(--surface-alt);
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .summary-row:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .summary-row span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .summary-row strong {
+      font-size: 20px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .progress {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #dbe2de;
+    }
+
+    .progress > div {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      transition: width 180ms ease;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .game-strip {
+      display: grid;
+      grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 14px;
+      border: 1px solid #b9cec5;
+      border-radius: 8px;
+      background: var(--accent-soft);
+    }
+
+    .game-strip .goal {
+      min-width: 0;
+    }
+
+    .game-strip span {
+      display: block;
+      color: #3c6257;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .game-strip strong {
+      display: block;
+      margin-bottom: 7px;
+      color: #124f41;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .game-progress {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #c5ddd4;
+    }
+
+    .game-progress > div {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      transition: width 180ms ease;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      right: 18px;
+      bottom: 18px;
+      max-width: min(340px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #173f35;
+      color: #ffffff;
+      box-shadow: 0 14px 36px rgba(15, 42, 35, 0.25);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      z-index: 50;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(13, 27, 22, 0.66);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .checkin-dialog {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 36px);
+      overflow-y: auto;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 24px 60px rgba(9, 26, 20, 0.32);
+    }
+
+    .checkin-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--accent-soft);
+    }
+
+    .checkin-head h3 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    .checkin-head p {
+      margin: 4px 0 0;
+      color: #46675d;
+      font-size: 13px;
+    }
+
+    .checkin-form {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+    }
+
+    .checkin-form textarea {
+      min-height: 68px;
+    }
+
+    .checkin-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-top: 4px;
+    }
+
+    .checkin-error {
+      color: var(--danger);
+      font-size: 13px;
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .metric span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .metric strong {
+      display: block;
+      overflow-wrap: anywhere;
+      font-size: 23px;
+      line-height: 1.2;
+    }
+
+    .metric small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 17px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .panel-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .day-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day-options label {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin: 0;
+      color: var(--ink);
+      font-weight: 550;
+    }
+
+    .day-options input {
+      width: 17px;
+      min-height: auto;
+      height: 17px;
+      accent-color: var(--accent);
+    }
+
+    .schedule {
+      display: grid;
+      gap: 0;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 88px 24px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .task:first-child {
+      padding-top: 0;
+    }
+
+    .task:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .task-time {
+      color: var(--muted);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .task-check {
+      width: 18px;
+      height: 18px;
+      margin: 2px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .task-main {
+      min-width: 0;
+    }
+
+    .task-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 680;
+    }
+
+    .task-note {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .task.done .task-title,
+    .task.done .task-note {
+      color: #8b9691;
+      text-decoration: line-through;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 730;
+      white-space: nowrap;
+    }
+
+    .tag.study {
+      background: var(--study-soft);
+      color: var(--study);
+    }
+
+    .tag.sport {
+      background: var(--sport-soft);
+      color: var(--sport);
+    }
+
+    .tag.life {
+      background: var(--life-soft);
+      color: var(--life);
+    }
+
+    .tag.cat {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .week-grid,
+    .records-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .day-card,
+    .record-card {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-alt);
+    }
+
+    .day-card h4,
+    .record-card h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .day-card .date {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .day-card ul {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: #3b4641;
+      font-size: 13px;
+    }
+
+    .day-card li {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .day-card li time {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .record-card {
+      display: grid;
+      gap: 11px;
+    }
+
+    .inline-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .inline-form.two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 7px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .log-item:last-child {
+      border-bottom: 0;
+    }
+
+    .log-item span {
+      color: var(--muted);
+    }
+
+    .safety-note {
+      margin-top: 16px;
+      padding: 13px 15px;
+      border-left: 4px solid var(--sport);
+      background: var(--sport-soft);
+      color: #723d18;
+      font-size: 13px;
+    }
+
+    .empty {
+      padding: 28px 16px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 1080px) {
+      .app {
+        grid-template-columns: 280px minmax(0, 1fr);
+      }
+
+      .overview {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .game-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        display: block;
+      }
+
+      .profile-panel {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workspace {
+        padding-top: 20px;
+      }
+
+      .topbar {
+        display: block;
+      }
+
+      .date-control {
+        margin-top: 12px;
+      }
+
+      .week-grid,
+      .records-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .field-grid,
+      .metrics,
+      .game-strip,
+      .inline-form,
+      .inline-form.two {
+        grid-template-columns: 1fr;
+      }
+
+      .task {
+        grid-template-columns: 68px 22px minmax(0, 1fr);
+      }
+
+      .task .tag {
+        grid-column: 3;
+        justify-self: start;
+      }
+
+      .panel-head {
+        align-items: flex-start;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .app {
+        display: block;
+      }
+
+      .profile-panel,
+      .tabs,
+      .date-control,
+      .profile-actions,
+      .button {
+        display: none;
+      }
+
+      .workspace {
+        padding: 0;
+      }
+
+      .view {
+        display: block !important;
+        break-before: page;
+      }
+
+      .overview-main,
+      .summary,
+      .panel,
+      .metric,
+      .day-card,
+      .record-card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="profile-panel">
+      <div class="brand">
+        <div class="brand-mark">节律</div>
+        <div>
+          <h1>个人节律 ToDo</h1>
+          <p>根据你的时间和目标生成当天行动</p>
+        </div>
+      </div>
+
+      <section class="profile-section">
+        <h2>身体目标</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="currentWeight">当前体重（公斤）</label>
+            <input id="currentWeight" type="number" min="30" max="250" step="0.1">
+          </div>
+          <div class="field">
+            <label for="targetWeight">目标体重（公斤）</label>
+            <input id="targetWeight" type="number" min="30" max="250" step="0.1">
+          </div>
+          <div class="field">
+            <label for="height">身高（厘米，可选）</label>
+            <input id="height" type="number" min="100" max="230" step="0.1" placeholder="用于评估 BMI">
+          </div>
+          <div class="field">
+            <label for="workoutDays">每周运动次数</label>
+            <select id="workoutDays">
+              <option value="3">3 次</option>
+              <option value="4">4 次</option>
+              <option value="5">5 次</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>可用运动</label>
+            <div class="check-row">
+              <label><input id="sportTennis" type="checkbox"> 网球</label>
+              <label><input id="sportSwim" type="checkbox"> 游泳</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <h2>每日时间</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="wakeTime">起床</label>
+            <input id="wakeTime" type="time">
+          </div>
+          <div class="field">
+            <label for="sleepTime">入睡</label>
+            <input id="sleepTime" type="time">
+          </div>
+          <div class="field full">
+            <label for="freeTime">工作日下班时间</label>
+            <input id="freeTime" type="time">
+          </div>
+          <div class="field">
+            <label for="homeTime">预计到家</label>
+            <input id="homeTime" type="time">
+          </div>
+          <div class="field">
+            <label for="academicStart">日间学业开始</label>
+            <input id="academicStart" type="time">
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <h2>学业与生活</h2>
+        <div class="field-grid">
+          <div class="field full">
+            <label for="academicPriority">当前学业优先级</label>
+            <select id="academicPriority">
+              <option value="contact">优先联系导师</option>
+              <option value="paper">优先推进文章</option>
+              <option value="both">联系导师与推进文章并重</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cookingDays">每周做饭</label>
+            <select id="cookingDays">
+              <option value="1">1 次</option>
+              <option value="2">2 次</option>
+              <option value="3">3 次</option>
+              <option value="4">4 次</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="catCount">猫咪数量</label>
+            <input id="catCount" type="number" min="0" max="10" step="1">
+          </div>
+          <div class="field">
+            <label for="laundryDays">每周洗衣</label>
+            <select id="laundryDays">
+              <option value="1">1 次</option>
+              <option value="2">2 次</option>
+              <option value="3">3 次</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="periodDaysPerMonth">每月经期休息</label>
+            <select id="periodDaysPerMonth">
+              <option value="2">2 天</option>
+              <option value="3">3 天</option>
+              <option value="4">4 天</option>
+              <option value="5">5 天</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="monthlyBudget">每月生活费（元）</label>
+            <input id="monthlyBudget" type="number" min="0" step="50">
+          </div>
+        </div>
+      </section>
+
+      <div class="profile-actions">
+        <button class="button primary" id="generatePlan" type="button">重新生成</button>
+        <button class="button" id="exportData" type="button">导出数据</button>
+        <button class="button" id="enableNotifications" type="button">开启提醒</button>
+        <button class="button" id="downloadCalendar" type="button">导入手机提醒</button>
+        <button class="button" id="installApp" type="button">安装到主屏</button>
+        <button class="button danger" id="resetData" type="button">清空记录</button>
+        <button class="button" id="printPlan" type="button">打印计划</button>
+        <div class="notification-status" id="notificationStatus">提醒尚未开启</div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">今天的计划</h2>
+          <p id="pageSubtitle">把最重要的事放进固定时间，减少临场决定。</p>
+        </div>
+        <div class="date-control">
+          <label for="selectedDate">查看日期</label>
+          <input id="selectedDate" type="date">
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="计划视图">
+        <button class="active" type="button" data-view="today">今日执行</button>
+        <button type="button" data-view="week">本周安排</button>
+        <button type="button" data-view="records">记录</button>
+      </nav>
+
+      <section class="view active" id="view-today">
+        <div class="overview">
+          <article class="overview-main">
+            <p class="eyebrow" id="dayType">工作日</p>
+            <h3 id="focusTitle">今天只抓一个核心结果</h3>
+            <p id="focusDescription">学业深度块优先，运动和家务按时执行，但不挤占睡眠。</p>
+          </article>
+          <aside class="summary">
+            <div class="summary-row">
+              <span>今日完成</span>
+              <strong id="completionText">0 / 0</strong>
+            </div>
+            <div class="progress" aria-hidden="true">
+              <div id="completionProgress"></div>
+            </div>
+            <div class="summary-row">
+              <span>运动安排</span>
+              <strong id="workoutSummary">恢复</strong>
+            </div>
+            <div class="summary-row">
+              <span>学业深度块</span>
+              <strong id="studySummary">90 分钟</strong>
+            </div>
+          </aside>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <span>体重方向</span>
+            <strong id="weightDirection">58 → 52.5 kg</strong>
+            <small id="safePace">安全区间约 12 至 22 周</small>
+          </div>
+          <div class="metric">
+            <span>今日学业</span>
+            <strong id="studyMinutes">0 分钟</strong>
+            <small>手动记录后更新</small>
+          </div>
+          <div class="metric">
+            <span>本月支出</span>
+            <strong id="spentText">0 元</strong>
+            <small id="budgetText">预算 2000 元</small>
+          </div>
+          <div class="metric">
+            <span>最近体重</span>
+            <strong id="latestWeight">58 kg</strong>
+            <small id="weightChange">尚无趋势记录</small>
+          </div>
+        </div>
+
+        <div class="game-strip">
+          <div class="goal">
+            <span>每日目标</span>
+            <strong><span id="todayXp">0</span> / 50 XP</strong>
+            <div class="game-progress" aria-hidden="true">
+              <div id="goalProgress"></div>
+            </div>
+          </div>
+          <div>
+            <span>连续坚持</span>
+            <strong><span id="streakCount">0</span> 天</strong>
+          </div>
+          <div>
+            <span>累计 XP</span>
+            <strong id="totalXp">0</strong>
+          </div>
+          <div>
+            <span>等级</span>
+            <strong id="levelText">Lv.1</strong>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h3 id="scheduleTitle">今日时间表</h3>
+              <p id="scheduleNote">到点发送提醒；勾选只记录进度，不要求强制打卡。</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="day-options">
+              <label><input id="packagePickup" type="checkbox"> 今天有快递，需要去取</label>
+              <label><input id="laundryToday" type="checkbox"> 今天洗衣服</label>
+              <label><input id="periodRest" type="checkbox"> 经期休息日，不安排运动</label>
+            </div>
+            <div class="schedule" id="scheduleList"></div>
+          </div>
+        </section>
+
+        <div class="safety-note">
+          运动、饮食和减重只按可持续标准推进。伤病、明显失眠、眩晕或失控进食时，停止加码并优先恢复。
+        </div>
+      </section>
+
+      <section class="view" id="view-week">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>本周安排</h3>
+              <p>运动与学业交替分配，周日保留复盘和大块恢复。</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="week-grid" id="weekGrid"></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="view-records">
+        <div class="records-grid">
+          <section class="record-card">
+            <h4>今日记录</h4>
+            <div class="inline-form two">
+              <div>
+                <label for="dailyStudy">学业分钟</label>
+                <input id="dailyStudy" type="number" min="0" step="5">
+              </div>
+              <div>
+                <label for="dailyWeight">今日体重（公斤）</label>
+                <input id="dailyWeight" type="number" min="30" max="250" step="0.1">
+              </div>
+            </div>
+            <div>
+              <label for="dailyNotes">今日备注</label>
+              <textarea id="dailyNotes" placeholder="最大阻碍、身体状态、明天最小动作"></textarea>
+            </div>
+            <button class="button primary" id="saveDailyRecord" type="button">保存今日记录</button>
+          </section>
+
+          <section class="record-card">
+            <h4>支出记录</h4>
+            <div class="inline-form">
+              <div>
+                <label for="expenseAmount">金额（元）</label>
+                <input id="expenseAmount" type="number" min="0" step="0.1">
+              </div>
+              <div>
+                <label for="expenseCategory">类别</label>
+                <select id="expenseCategory">
+                  <option value="餐饮">餐饮</option>
+                  <option value="交通">交通</option>
+                  <option value="猫咪">猫咪</option>
+                  <option value="运动">运动</option>
+                  <option value="学习">学习</option>
+                  <option value="日用">日用</option>
+                  <option value="其他">其他</option>
+                </select>
+              </div>
+              <button class="button primary" id="addExpense" type="button">添加</button>
+            </div>
+            <div class="log-list" id="expenseList"></div>
+          </section>
+
+          <section class="record-card">
+            <h4>体重记录</h4>
+            <div class="log-list" id="weightList"></div>
+          </section>
+
+          <section class="record-card">
+            <h4>今日优先级</h4>
+            <div>
+              <label for="topOutcome">今天最重要的可评价结果</label>
+              <textarea id="topOutcome" placeholder="例如：完成导师名单并发出 2 封邮件"></textarea>
+            </div>
+            <button class="button" id="saveOutcome" type="button">保存重点</button>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const STORAGE_KEY = "personal-rhythm-todo-v1";
+    const SETTINGS_VERSION = 2;
+    const TEST_MODE = new URLSearchParams(window.location.search).has("test");
+
+    const DEFAULT_PROFILE = {
+      currentWeight: 58,
+      targetWeight: 52.5,
+      height: "",
+      workoutDays: 4,
+      sports: ["swim", "tennis"],
+      wakeTime: "07:20",
+      sleepTime: "22:30",
+      freeTime: "17:30",
+      homeTime: "18:00",
+      academicStart: "08:00",
+      academicPriority: "both",
+      cookingDays: 2,
+      catCount: 2,
+      laundryDays: 2,
+      periodDaysPerMonth: 3,
+      monthlyBudget: 2000
+    };
+
+    const DEFAULT_STATE = {
+      profile: { ...DEFAULT_PROFILE },
+      completed: {},
+      daily: {},
+      expenses: [],
+      weights: [],
+      outcomes: {},
+      dayOptions: {},
+      notified: {},
+      taskPoints: {},
+      checkins: {},
+      settingsVersion: SETTINGS_VERSION
+    };
+
+    let state = loadState();
+    saveState();
+    let selectedDateKey = dateKey(new Date());
+
+    const elements = {
+      currentWeight: document.getElementById("currentWeight"),
+      targetWeight: document.getElementById("targetWeight"),
+      height: document.getElementById("height"),
+      workoutDays: document.getElementById("workoutDays"),
+      sportTennis: document.getElementById("sportTennis"),
+      sportSwim: document.getElementById("sportSwim"),
+      wakeTime: document.getElementById("wakeTime"),
+      sleepTime: document.getElementById("sleepTime"),
+      freeTime: document.getElementById("freeTime"),
+      homeTime: document.getElementById("homeTime"),
+      academicStart: document.getElementById("academicStart"),
+      academicPriority: document.getElementById("academicPriority"),
+      cookingDays: document.getElementById("cookingDays"),
+      catCount: document.getElementById("catCount"),
+      laundryDays: document.getElementById("laundryDays"),
+      periodDaysPerMonth: document.getElementById("periodDaysPerMonth"),
+      monthlyBudget: document.getElementById("monthlyBudget"),
+      packagePickup: document.getElementById("packagePickup"),
+      laundryToday: document.getElementById("laundryToday"),
+      periodRest: document.getElementById("periodRest"),
+      selectedDate: document.getElementById("selectedDate"),
+      scheduleList: document.getElementById("scheduleList"),
+      weekGrid: document.getElementById("weekGrid"),
+      expenseList: document.getElementById("expenseList"),
+      weightList: document.getElementById("weightList"),
+      dailyStudy: document.getElementById("dailyStudy"),
+      dailyWeight: document.getElementById("dailyWeight"),
+      dailyNotes: document.getElementById("dailyNotes"),
+      topOutcome: document.getElementById("topOutcome")
+    };
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!saved) {
+          return clone(DEFAULT_STATE);
+        }
+        const migrated = {
+          ...clone(DEFAULT_STATE),
+          ...saved,
+          profile: { ...DEFAULT_PROFILE, ...(saved.profile || {}) },
+          completed: saved.completed || {},
+          daily: saved.daily || {},
+          expenses: Array.isArray(saved.expenses) ? saved.expenses : [],
+          weights: Array.isArray(saved.weights) ? saved.weights : [],
+          outcomes: saved.outcomes || {},
+          dayOptions: saved.dayOptions || {},
+          notified: saved.notified || {},
+          taskPoints: saved.taskPoints || {},
+          checkins: saved.checkins || {},
+          settingsVersion: SETTINGS_VERSION
+        };
+        if (Number(saved.settingsVersion || 1) < SETTINGS_VERSION) {
+          migrated.profile.wakeTime = "07:20";
+        }
+        return migrated;
+      } catch (error) {
+        return clone(DEFAULT_STATE);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function dateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseDateKey(key) {
+      const [year, month, day] = key.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function addDays(date, days) {
+      const next = new Date(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    }
+
+    function startOfWeek(date) {
+      const day = date.getDay();
+      const offset = day === 0 ? -6 : 1 - day;
+      return addDays(date, offset);
+    }
+
+    function formatDate(key) {
+      const date = parseDateKey(key);
+      return new Intl.DateTimeFormat("zh-CN", {
+        month: "long",
+        day: "numeric",
+        weekday: "long"
+      }).format(date);
+    }
+
+    function timeToMinutes(value) {
+      const [hours, minutes] = value.split(":").map(Number);
+      return hours * 60 + minutes;
+    }
+
+    function minutesToTime(total) {
+      const normalized = ((Math.round(total) % 1440) + 1440) % 1440;
+      const hours = Math.floor(normalized / 60);
+      const minutes = normalized % 60;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+
+    function shiftTime(value, minutes) {
+      return minutesToTime(timeToMinutes(value) + minutes);
+    }
+
+    function getWorkoutIndex(date) {
+      const day = date.getDay();
+      const plans = {
+        3: [1, 3, 5],
+        4: [1, 3, 5, 6],
+        5: [1, 2, 3, 5, 6]
+      };
+      const week = startOfWeek(date);
+      const keys = (plans[state.profile.workoutDays] || plans[4])
+        .map((offset) => dateKey(addDays(week, offset - 1)));
+      return keys.indexOf(dateKey(date));
+    }
+
+    function getSportName(index) {
+      const sports = [];
+      if (state.profile.sports.includes("swim")) {
+        sports.push("游泳");
+      }
+      if (state.profile.sports.includes("tennis")) {
+        sports.push("网球");
+      }
+      if (sports.length === 0) {
+        return "快走或低强度有氧";
+      }
+      return sports[index % sports.length];
+    }
+
+    function getLaundryDefault(day) {
+      const daysByCount = {
+        1: [6],
+        2: [2, 6],
+        3: [2, 4, 6]
+      };
+      return (daysByCount[state.profile.laundryDays] || daysByCount[2]).includes(day);
+    }
+
+    function isCookingDay(day) {
+      const daysByCount = {
+        1: [0],
+        2: [3, 0],
+        3: [2, 4, 0],
+        4: [1, 2, 3, 0]
+      };
+      return (daysByCount[state.profile.cookingDays] || daysByCount[2]).includes(day);
+    }
+
+    function getDayOptions(key) {
+      const day = parseDateKey(key).getDay();
+      const saved = state.dayOptions[key] || {};
+      return {
+        packagePickup: Boolean(saved.packagePickup),
+        laundry: typeof saved.laundry === "boolean" ? saved.laundry : getLaundryDefault(day),
+        periodRest: Boolean(saved.periodRest)
+      };
+    }
+
+    function weekdayPlan(date) {
+      const workoutIndex = getWorkoutIndex(date);
+      const hasWorkout = workoutIndex >= 0;
+      const free = state.profile.freeTime;
+      const home = state.profile.homeTime;
+      const academicStart = state.profile.academicStart;
+      const catCount = Number(state.profile.catCount || 0);
+      const options = getDayOptions(dateKey(date));
+      const cookingTitle = isCookingDay(date.getDay()) ? "做饭与晚餐" : "晚餐";
+      const morningTitle = state.profile.academicPriority === "contact"
+        ? "导师联系：匹配筛选与邮件"
+        : state.profile.academicPriority === "paper"
+          ? "论文推进：上午深度块"
+          : "上午学业：论文推进与导师联系";
+      const afternoonTitle = state.profile.academicPriority === "contact"
+        ? "导师资料整理与持续跟进"
+        : state.profile.academicPriority === "paper"
+          ? "论文推进：下午深度块"
+          : "下午学业：论文写作与分析";
+      const exerciseItems = hasWorkout && !options.periodRest
+        ? [{
+            id: "exercise",
+            time: shiftTime(home, 15),
+            title: `${getSportName(workoutIndex)}：45 至 60 分钟`,
+            note: "按能力完成，疼痛或眩晕立即停止。",
+            category: "sport"
+          }]
+        : [];
+      const periodRestItems = options.periodRest
+        ? [{
+            id: "period-rest",
+            time: shiftTime(home, 15),
+            title: "经期休息日：今天不安排任何运动",
+            note: "不补练、不抵消、不把休息解释成失败。",
+            category: "life"
+          }]
+        : [];
+      const packageItems = options.packagePickup
+        ? [{
+            id: "package",
+            time: shiftTime(free, 15),
+            title: "取快递",
+            note: "如果需要排队或绕路，直接压缩自由休息，不推迟睡眠。",
+            category: "life"
+          }]
+        : [];
+      const laundryItems = options.laundry
+        ? [{
+            id: "laundry",
+            time: shiftTime(home, hasWorkout ? 165 : 60),
+            title: "洗衣服：启动一桶并完成晾晒",
+            note: "只处理衣物，不顺手扩大到全屋整理。",
+            category: "life"
+          }]
+        : [];
+
+      return [
+        {
+          id: "wake",
+          time: state.profile.wakeTime,
+          title: "起床，补水并简单整理床铺",
+          note: "猫咪照护统一放在晚间完成。",
+          category: "life"
+        },
+        {
+          id: "breakfast",
+          time: shiftTime(state.profile.wakeTime, 20),
+          title: "早餐，确认今天唯一重点",
+          note: "记录到“今日优先级”，不要只写“努力工作”。",
+          category: "life"
+        },
+        {
+          id: "study-morning",
+          time: academicStart,
+          title: morningTitle,
+          note: "日间第一深度块，产出要能保存或发送。",
+          category: "study"
+        },
+        {
+          id: "lunch",
+          time: "11:30",
+          title: "午餐与午休",
+          note: "11:30 至 14:30 不安排任何任务、学习或运动。",
+          category: "life"
+        },
+        {
+          id: "study-afternoon",
+          time: "14:30",
+          title: afternoonTitle,
+          note: "14:30 开始，优先完成最难的判断或写作。",
+          category: "study"
+        },
+        {
+          id: "study-admin",
+          time: "16:30",
+          title: "沟通、文献与收尾",
+          note: "处理邮件、记录、材料、排期和明日第一件事。",
+          category: "study"
+        },
+        {
+          id: "leave",
+          time: free,
+          title: "下班，换衣服，检查是否有快递",
+          note: "工作界面关闭，学术任务不再无限延伸到晚上。",
+          category: "life"
+        },
+        ...packageItems,
+        {
+          id: "arrive",
+          time: home,
+          title: "回家缓冲，检查猫粮、水和猫砂",
+          note: "15 分钟内完成，不顺手打开长期娱乐。",
+          category: "cat"
+        },
+        ...periodRestItems,
+        ...exerciseItems,
+        {
+          id: "dinner",
+          time: shiftTime(home, hasWorkout ? 80 : 15),
+          title: `${cookingTitle}：蛋白质、蔬菜和适量主食`,
+          note: "不以跳过正餐补偿未完成的运动。",
+          category: "life"
+        },
+        ...laundryItems,
+        {
+          id: "reset",
+          time: shiftTime(home, hasWorkout ? 135 : 90),
+          title: "15 分钟生活复位",
+          note: "只处理最显眼的凌乱，不追求一次整理完。",
+          category: "life"
+        },
+        {
+          id: "free",
+          time: shiftTime(home, 120),
+          title: "自由休息",
+          note: "非运动日不自动添加散步或拉伸，按意愿安排。",
+          category: "life"
+        },
+        {
+          id: "cat-night",
+          time: shiftTime(home, 180),
+          title: catCount ? `晚间照护 ${catCount} 只猫，准备明天物品` : "晚间照护，准备明天物品",
+          note: "统一完成喂食、补水、清理猫砂，并处理明日第一件事。",
+          category: "cat"
+        },
+        {
+          id: "wind-down",
+          time: shiftTime(home, 200),
+          title: "洗漱与收尾",
+          note: "关闭高强度脑力任务。",
+          category: "life"
+        },
+        {
+          id: "sleep",
+          time: state.profile.sleepTime,
+          title: "上床，目标入睡",
+          note: "睡眠不作为失败后的惩罚额度。",
+          category: "life"
+        }
+      ];
+    }
+
+    function weekendPlan(date) {
+      const day = date.getDay();
+      const workoutIndex = getWorkoutIndex(date);
+      const hasWorkout = workoutIndex >= 0;
+      const catCount = Number(state.profile.catCount || 0);
+      const options = getDayOptions(dateKey(date));
+      const studyTitle = state.profile.academicPriority === "contact"
+        ? "导师联系与材料整理"
+        : state.profile.academicPriority === "paper"
+          ? "论文深度工作：大块产出"
+          : "论文深度工作与导师联系";
+      const exerciseItems = hasWorkout && !options.periodRest
+        ? [{
+            id: "exercise",
+            time: "14:30",
+            title: `${getSportName(workoutIndex)}：60 至 90 分钟`,
+            note: "运动前后正常补水和进食。",
+            category: "sport"
+          }]
+        : [];
+      const periodRestItems = options.periodRest
+        ? [{
+            id: "period-rest",
+            time: "14:30",
+            title: "经期休息日：今天不安排任何运动",
+            note: "不补练、不抵消、不把休息解释成失败。",
+            category: "life"
+          }]
+        : [];
+      const packageItems = options.packagePickup
+        ? [{
+            id: "package",
+            time: "16:30",
+            title: "取快递",
+            note: "取完直接回家，不把周末时间耗在无计划闲逛。",
+            category: "life"
+          }]
+        : [];
+      const laundryItems = options.laundry
+        ? [{
+            id: "laundry",
+            time: day === 6 ? "19:30" : "19:00",
+            title: "洗衣服、晾晒并收好",
+            note: "洗衣和其他家务分开，避免整晚都耗在整理上。",
+            category: "life"
+          }]
+        : [];
+
+      if (day === 6) {
+        return [
+          {
+            id: "wake",
+            time: "08:00",
+            title: "起床，补水并简单整理床铺",
+            note: "猫咪照护统一放在晚间完成。",
+            category: "life"
+          },
+          {
+            id: "breakfast",
+            time: "08:30",
+            title: "早餐与今日安排",
+            note: "周末也不跳过早餐。",
+            category: "life"
+          },
+          {
+            id: "study-main",
+            time: "09:30",
+            title: studyTitle,
+            note: "先完成一个可保存、可评价的产出。",
+            category: "study"
+          },
+          {
+            id: "lunch",
+            time: "11:30",
+            title: "午餐与午休",
+            note: "11:30 至 14:30 不安排任何任务、学习或运动。",
+            category: "life"
+          },
+          ...periodRestItems,
+          ...exerciseItems,
+          {
+            id: "home",
+            time: "16:30",
+            title: "全屋清洁 45 至 60 分钟",
+            note: "按区域处理，不重新整理所有物品。",
+            category: "life"
+          },
+          ...packageItems,
+          {
+            id: "dinner",
+            time: "18:00",
+            title: isCookingDay(day) ? "做饭与晚餐" : "晚餐",
+            note: "",
+            category: "life"
+          },
+          ...laundryItems,
+          {
+            id: "cat-night",
+            time: "21:10",
+            title: catCount ? `晚间照护 ${catCount} 只猫` : "晚间照护",
+            note: "统一完成喂食、补水、清理猫砂。",
+            category: "cat"
+          },
+          {
+            id: "wind-down",
+            time: "21:30",
+            title: "洗漱与收尾",
+            note: "",
+            category: "life"
+          },
+          {
+            id: "sleep",
+            time: state.profile.sleepTime,
+            title: "上床，目标入睡",
+            note: "",
+            category: "life"
+          }
+        ];
+      }
+
+      return [
+          {
+            id: "wake",
+            time: "08:30",
+            title: "起床，补水并简单整理床铺",
+            note: "猫咪照护统一放在晚间完成。",
+            category: "life"
+        },
+        {
+          id: "breakfast",
+          time: "09:00",
+          title: "早餐",
+          note: "",
+          category: "life"
+        },
+        {
+          id: "weekly-review",
+          time: "10:00",
+          title: "周复盘与下周目标",
+          note: "最多设置三个可验证目标，并写出未完成后的安全后果。",
+          category: "study"
+        },
+        {
+          id: "rest",
+          time: "11:00",
+          title: "自由休息",
+          note: "不安排强制性运动或散步。",
+          category: "life"
+        },
+        {
+          id: "lunch",
+          time: "11:30",
+          title: "午餐与午休",
+          note: "11:30 至 14:30 不安排任何任务、学习或运动。",
+          category: "life"
+        },
+        ...periodRestItems,
+        ...exerciseItems,
+        {
+          id: "outing",
+          time: "14:30",
+          title: "自由安排：外出或在家休息",
+          note: "不把休息日重新填满任务。",
+          category: "life"
+        },
+        {
+          id: "meal-prep",
+          time: "16:00",
+          title: "备餐与下周准备",
+          note: "为工作日减少临时外卖和临场决策。",
+          category: "life"
+        },
+        ...packageItems,
+        {
+          id: "dinner",
+          time: "18:00",
+          title: isCookingDay(day) ? "做饭与晚餐" : "晚餐",
+          note: "",
+          category: "life"
+        },
+        ...laundryItems,
+        {
+          id: "cat-night",
+          time: "21:10",
+          title: catCount ? `晚间照护 ${catCount} 只猫` : "晚间照护",
+          note: "统一完成喂食、补水、清理猫砂。",
+          category: "cat"
+        },
+        {
+          id: "wind-down",
+          time: "21:30",
+          title: "洗漱与收尾",
+          note: "",
+          category: "life"
+        },
+        {
+          id: "sleep",
+          time: state.profile.sleepTime,
+          title: "上床，目标入睡",
+          note: "",
+          category: "life"
+        }
+      ];
+    }
+
+    function generatePlan(key) {
+      const date = parseDateKey(key);
+      const day = date.getDay();
+      const plan = day === 0 || day === 6 ? weekendPlan(date) : weekdayPlan(date);
+      return plan
+        .filter((item) => timeToMinutes(item.time) < timeToMinutes(state.profile.sleepTime) + 1)
+        .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+    }
+
+    function categoryLabel(category) {
+      return {
+        study: "学业",
+        sport: "运动",
+        life: "生活",
+        cat: "猫咪"
+      }[category] || "任务";
+    }
+
+    function getTaskPoints(task) {
+      return {
+        study: 10,
+        sport: 15,
+        life: 5,
+        cat: 5
+      }[task.category] || 5;
+    }
+
+    function pointsForDay(key) {
+      const plan = generatePlan(key);
+      const points = state.taskPoints[key] || {};
+      return plan.reduce((sum, task) => sum + Number(points[task.id] || 0), 0);
+    }
+
+    function isDayGoalMet(key) {
+      return pointsForDay(key) >= 50;
+    }
+
+    function calculateStreak() {
+      let streak = 0;
+      let cursor = new Date();
+
+      if (!isDayGoalMet(dateKey(cursor))) {
+        cursor = addDays(cursor, -1);
+      }
+
+      while (streak < 365 && isDayGoalMet(dateKey(cursor))) {
+        streak += 1;
+        cursor = addDays(cursor, -1);
+      }
+
+      return streak;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timeoutId);
+      showToast.timeoutId = window.setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2600);
+    }
+
+    function renderGamification() {
+      const todayXp = pointsForDay(selectedDateKey);
+      const totalXp = Object.values(state.taskPoints).reduce((daySum, day) => {
+        return daySum + Object.values(day).reduce((sum, points) => sum + Number(points || 0), 0);
+      }, 0);
+      const level = Math.floor(totalXp / 300) + 1;
+
+      document.getElementById("todayXp").textContent = todayXp;
+      document.getElementById("totalXp").textContent = totalXp;
+      document.getElementById("streakCount").textContent = calculateStreak();
+      document.getElementById("levelText").textContent = `Lv.${level}`;
+      document.getElementById("goalProgress").style.width = `${Math.min(100, (todayXp / 50) * 100)}%`;
+    }
+
+    function renderProfile() {
+      const profile = state.profile;
+      elements.currentWeight.value = profile.currentWeight;
+      elements.targetWeight.value = profile.targetWeight;
+      elements.height.value = profile.height;
+      elements.workoutDays.value = String(profile.workoutDays);
+      elements.sportTennis.checked = profile.sports.includes("tennis");
+      elements.sportSwim.checked = profile.sports.includes("swim");
+      elements.wakeTime.value = profile.wakeTime;
+      elements.sleepTime.value = profile.sleepTime;
+      elements.freeTime.value = profile.freeTime;
+      elements.homeTime.value = profile.homeTime;
+      elements.academicStart.value = profile.academicStart;
+      elements.academicPriority.value = profile.academicPriority;
+      elements.cookingDays.value = String(profile.cookingDays);
+      elements.catCount.value = profile.catCount;
+      elements.laundryDays.value = String(profile.laundryDays);
+      elements.periodDaysPerMonth.value = String(profile.periodDaysPerMonth);
+      elements.monthlyBudget.value = profile.monthlyBudget;
+      elements.selectedDate.value = selectedDateKey;
+    }
+
+    function updateProfileFromInputs() {
+      const sports = [];
+      if (elements.sportTennis.checked) {
+        sports.push("tennis");
+      }
+      if (elements.sportSwim.checked) {
+        sports.push("swim");
+      }
+
+      state.profile = {
+        currentWeight: Number(elements.currentWeight.value || DEFAULT_PROFILE.currentWeight),
+        targetWeight: Number(elements.targetWeight.value || DEFAULT_PROFILE.targetWeight),
+        height: elements.height.value ? Number(elements.height.value) : "",
+        workoutDays: Number(elements.workoutDays.value || 4),
+        sports,
+        wakeTime: elements.wakeTime.value || DEFAULT_PROFILE.wakeTime,
+        sleepTime: elements.sleepTime.value || DEFAULT_PROFILE.sleepTime,
+        freeTime: elements.freeTime.value || DEFAULT_PROFILE.freeTime,
+        homeTime: elements.homeTime.value || DEFAULT_PROFILE.homeTime,
+        academicStart: elements.academicStart.value || DEFAULT_PROFILE.academicStart,
+        academicPriority: elements.academicPriority.value,
+        cookingDays: Number(elements.cookingDays.value || 2),
+        catCount: Number(elements.catCount.value || 0),
+        laundryDays: Number(elements.laundryDays.value || 2),
+        periodDaysPerMonth: Number(elements.periodDaysPerMonth.value || 3),
+        monthlyBudget: Number(elements.monthlyBudget.value || 0)
+      };
+      saveState();
+      renderAll();
+    }
+
+    function renderToday() {
+      const plan = generatePlan(selectedDateKey);
+      const completed = state.completed[selectedDateKey] || {};
+      const completedCount = plan.filter((item) => completed[item.id]).length;
+      const date = parseDateKey(selectedDateKey);
+      const day = date.getDay();
+      const isWeekend = day === 0 || day === 6;
+      const workoutIndex = getWorkoutIndex(date);
+      const options = getDayOptions(selectedDateKey);
+      const monthKey = selectedDateKey.slice(0, 7);
+      const periodDaysUsed = Object.entries(state.dayOptions)
+        .filter(([key, value]) => key.startsWith(monthKey) && value.periodRest)
+        .length;
+
+      document.getElementById("pageTitle").textContent = isWeekend ? "周末计划" : "今天的执行计划";
+      document.getElementById("pageSubtitle").textContent = formatDate(selectedDateKey);
+      const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+      const nextTask = plan.find((item) => timeToMinutes(item.time) >= nowMinutes - 2) || plan[plan.length - 1];
+      document.getElementById("dayType").textContent = nextTask
+        ? `${isWeekend ? "周末" : "工作日"} · ${nextTask.time} 下一提醒`
+        : isWeekend ? "周末" : "工作日";
+      document.getElementById("scheduleTitle").textContent = `${formatDate(selectedDateKey)}时间表`;
+      document.getElementById("completionText").textContent = `${completedCount} / ${plan.length}`;
+      document.getElementById("completionProgress").style.width = `${plan.length ? (completedCount / plan.length) * 100 : 0}%`;
+      document.getElementById("workoutSummary").textContent = options.periodRest
+        ? `经期休息 ${periodDaysUsed}/${state.profile.periodDaysPerMonth}`
+        : workoutIndex >= 0
+          ? `${getSportName(workoutIndex)} 60 分钟`
+          : "无运动";
+      document.getElementById("studySummary").textContent = isWeekend ? "按周末块安排" : "08:00 至 17:30";
+      elements.packagePickup.checked = options.packagePickup;
+      elements.laundryToday.checked = options.laundry;
+      elements.periodRest.checked = options.periodRest;
+
+      document.getElementById("focusTitle").textContent = nextTask
+        ? nextTask.title
+        : isWeekend ? "今天按周末节奏执行" : "今天按工作计划执行";
+      document.getElementById("focusDescription").textContent = nextTask
+        ? nextTask.note || "到时间直接执行，不重新规划。"
+        : "到点提醒会显示下一项任务。";
+
+      elements.scheduleList.innerHTML = "";
+      plan.forEach((task) => {
+        const row = document.createElement("div");
+        row.className = `task${completed[task.id] ? " done" : ""}`;
+
+        const time = document.createElement("div");
+        time.className = "task-time";
+        time.textContent = task.time;
+
+        const checkbox = document.createElement("input");
+        checkbox.className = "task-check";
+        checkbox.type = "checkbox";
+        checkbox.checked = Boolean(completed[task.id]);
+        checkbox.dataset.taskId = task.id;
+        checkbox.setAttribute("aria-label", `${task.title}完成情况`);
+
+        const main = document.createElement("div");
+        main.className = "task-main";
+        const title = document.createElement("p");
+        title.className = "task-title";
+        title.textContent = task.title;
+        main.append(title);
+        if (task.note) {
+          const note = document.createElement("p");
+          note.className = "task-note";
+          note.textContent = task.note;
+          main.append(note);
+        }
+
+        const tag = document.createElement("span");
+        tag.className = `tag ${task.category}`;
+        tag.textContent = categoryLabel(task.category);
+
+        row.append(time, checkbox, main, tag);
+        elements.scheduleList.append(row);
+      });
+
+      renderGamification();
+    }
+
+    function renderWeek() {
+      const weekStart = startOfWeek(parseDateKey(selectedDateKey));
+      elements.weekGrid.innerHTML = "";
+
+      for (let index = 0; index < 7; index += 1) {
+        const date = addDays(weekStart, index);
+        const key = dateKey(date);
+        const plan = generatePlan(key);
+        const card = document.createElement("article");
+        card.className = "day-card";
+
+        const title = document.createElement("h4");
+        title.textContent = new Intl.DateTimeFormat("zh-CN", { weekday: "long" }).format(date);
+        const dateText = document.createElement("div");
+        dateText.className = "date";
+        dateText.textContent = `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+
+        const list = document.createElement("ul");
+        plan
+          .filter((item) => [
+            "exercise",
+            "period-rest",
+            "study-morning",
+            "study-afternoon",
+            "study-main",
+            "home",
+            "meal-prep",
+            "weekly-review",
+            "cat-night",
+            "laundry"
+          ].includes(item.id))
+          .forEach((item) => {
+            const row = document.createElement("li");
+            const time = document.createElement("time");
+            time.textContent = item.time;
+            const text = document.createElement("span");
+            text.textContent = item.title;
+            row.append(time, text);
+            list.append(row);
+          });
+
+        card.append(title, dateText, list);
+        elements.weekGrid.append(card);
+      }
+    }
+
+    function renderRecords() {
+      const daily = state.daily[selectedDateKey] || {};
+      elements.dailyStudy.value = daily.studyMinutes || "";
+      elements.dailyWeight.value = daily.weight || "";
+      elements.dailyNotes.value = daily.notes || "";
+      elements.topOutcome.value = state.outcomes[selectedDateKey] || "";
+
+      const recentExpenses = state.expenses.slice().sort((a, b) => b.createdAt - a.createdAt).slice(0, 12);
+      elements.expenseList.innerHTML = "";
+      if (recentExpenses.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "还没有支出记录。";
+        elements.expenseList.append(empty);
+      } else {
+        recentExpenses.forEach((expense) => {
+          const row = document.createElement("div");
+          row.className = "log-item";
+          const label = document.createElement("span");
+          label.textContent = `${expense.date} · ${expense.category}`;
+          const value = document.createElement("strong");
+          value.textContent = `${Number(expense.amount).toFixed(1)} 元`;
+          row.append(label, value);
+          elements.expenseList.append(row);
+        });
+      }
+
+      const sortedWeights = state.weights.slice().sort((a, b) => b.createdAt - a.createdAt).slice(0, 12);
+      elements.weightList.innerHTML = "";
+      if (sortedWeights.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "还没有体重记录。以周趋势判断，不因单日波动加码。";
+        elements.weightList.append(empty);
+      } else {
+        sortedWeights.forEach((entry) => {
+          const row = document.createElement("div");
+          row.className = "log-item";
+          const label = document.createElement("span");
+          label.textContent = entry.date;
+          const value = document.createElement("strong");
+          value.textContent = `${Number(entry.weight).toFixed(1)} kg`;
+          row.append(label, value);
+          elements.weightList.append(row);
+        });
+      }
+
+      updateMetrics();
+    }
+
+    function updateMetrics() {
+      const profile = state.profile;
+      const difference = Math.max(0, Number(profile.currentWeight) - Number(profile.targetWeight));
+      const latestWeight = state.weights.length
+        ? state.weights.slice().sort((a, b) => b.createdAt - a.createdAt)[0].weight
+        : profile.currentWeight;
+      const daily = state.daily[selectedDateKey] || {};
+      const month = selectedDateKey.slice(0, 7);
+      const spent = state.expenses
+        .filter((expense) => expense.date.startsWith(month))
+        .reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
+
+      document.getElementById("weightDirection").textContent = `${profile.currentWeight} → ${profile.targetWeight} kg`;
+      document.getElementById("safePace").textContent = difference
+        ? `按 0.25 至 0.5 kg/周估算约 ${Math.ceil(difference / 0.5)} 至 ${Math.ceil(difference / 0.25)} 周`
+        : "已达到方向目标，转为维持";
+      document.getElementById("studyMinutes").textContent = `${Number(daily.studyMinutes || 0)} 分钟`;
+      document.getElementById("spentText").textContent = `${spent.toFixed(1)} 元`;
+      document.getElementById("budgetText").textContent = `预算 ${Number(profile.monthlyBudget || 0)} 元，剩余 ${Math.max(0, profile.monthlyBudget - spent).toFixed(1)} 元`;
+      document.getElementById("latestWeight").textContent = `${Number(latestWeight).toFixed(1)} kg`;
+
+      if (state.weights.length >= 2) {
+        const sorted = state.weights.slice().sort((a, b) => a.createdAt - b.createdAt);
+        const change = Number(sorted[sorted.length - 1].weight) - Number(sorted[0].weight);
+        document.getElementById("weightChange").textContent = `记录期间 ${change >= 0 ? "+" : ""}${change.toFixed(1)} kg`;
+      } else {
+        document.getElementById("weightChange").textContent = "尚无趋势记录";
+      }
+    }
+
+    function renderAll() {
+      renderProfile();
+      renderToday();
+      renderWeek();
+      renderRecords();
+      renderGamification();
+    }
+
+    function saveDailyRecord() {
+      const studyMinutes = Number(elements.dailyStudy.value || 0);
+      const weightValue = elements.dailyWeight.value ? Number(elements.dailyWeight.value) : "";
+
+      state.daily[selectedDateKey] = {
+        studyMinutes,
+        weight: weightValue,
+        notes: elements.dailyNotes.value.trim()
+      };
+
+      if (weightValue) {
+        state.weights = state.weights.filter((entry) => entry.date !== selectedDateKey);
+        state.weights.push({
+          date: selectedDateKey,
+          weight: weightValue,
+          createdAt: Date.now()
+        });
+      }
+
+      saveState();
+      renderRecords();
+    }
+
+    function addExpense() {
+      const amount = Number(document.getElementById("expenseAmount").value || 0);
+      if (amount <= 0) {
+        return;
+      }
+      state.expenses.push({
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        date: selectedDateKey,
+        category: document.getElementById("expenseCategory").value,
+        amount,
+        createdAt: Date.now()
+      });
+      document.getElementById("expenseAmount").value = "";
+      saveState();
+      renderRecords();
+    }
+
+    let deferredInstallPrompt = null;
+
+    function updateNotificationStatus(message) {
+      document.getElementById("notificationStatus").textContent = message;
+    }
+
+    async function registerAppServiceWorker() {
+      if (!("serviceWorker" in navigator) || location.protocol === "file:") {
+        return null;
+      }
+      try {
+        return await navigator.serviceWorker.register("./service-worker.js");
+      } catch (error) {
+        updateNotificationStatus("离线缓存注册失败");
+        return null;
+      }
+    }
+
+    async function sendNotification(title, body, tag) {
+      if (!("Notification" in window) || Notification.permission !== "granted") {
+        return false;
+      }
+
+      try {
+        if ("serviceWorker" in navigator && location.protocol !== "file:") {
+          const registration = await navigator.serviceWorker.ready;
+          registration.active?.postMessage({
+            type: "SHOW_NOTIFICATION",
+            title,
+            body,
+            tag,
+            url: "./index.html"
+          });
+        } else {
+          new Notification(title, { body, tag, icon: "./icon-192.png" });
+        }
+        return true;
+      } catch (error) {
+        updateNotificationStatus("系统通知发送失败");
+        return false;
+      }
+    }
+
+    async function enableNotifications() {
+      if (!("Notification" in window)) {
+        updateNotificationStatus("当前浏览器不支持系统通知");
+        return;
+      }
+      if (location.protocol === "file:") {
+        updateNotificationStatus("请先通过 HTTPS 或 localhost 打开应用");
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        await registerAppServiceWorker();
+        await sendNotification("个人节律通知已开启", "应用打开时会按当天时间表提醒。", "notification-enabled");
+        updateNotificationStatus("系统通知已开启");
+      } else if (permission === "denied") {
+        updateNotificationStatus("通知被拒绝，可在浏览器设置中重新开启");
+      } else {
+        updateNotificationStatus("通知尚未开启");
+      }
+    }
+
+    async function checkDueReminders() {
+      if (!("Notification" in window) || Notification.permission !== "granted") {
+        return;
+      }
+
+      const today = dateKey(new Date());
+      if (selectedDateKey !== today) {
+        return;
+      }
+
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      const plan = generatePlan(today);
+
+      for (const task of plan) {
+        const taskMinutes = timeToMinutes(task.time);
+        const key = `${today}:${task.id}`;
+        const shouldNotify = nowMinutes >= taskMinutes && nowMinutes <= taskMinutes + 2;
+
+        if (shouldNotify && !state.notified[key]) {
+          const sent = await sendNotification(
+            `${task.time}，你应该去做：${task.title}`,
+            task.note || "现在执行这一项，不临时重排。",
+            key
+          );
+          if (sent) {
+            state.notified[key] = true;
+            saveState();
+          }
+        }
+      }
+
+    }
+
+    function escapeIcs(value) {
+      return String(value || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/\n/g, "\\n")
+        .replace(/([,;])/g, "\\$1");
+    }
+
+    function icsDate(date, time) {
+      const datePart = dateKey(date).replace(/-/g, "");
+      const timePart = time.replace(":", "") + "00";
+      return `${datePart}T${timePart}`;
+    }
+
+    function nextOccurrence(day, time) {
+      const today = new Date();
+      const nowMinutes = today.getHours() * 60 + today.getMinutes();
+      const delta = (day - today.getDay() + 7) % 7;
+      let result = addDays(today, delta);
+      if (delta === 0 && timeToMinutes(time) <= nowMinutes) {
+        result = addDays(result, 7);
+      }
+      return result;
+    }
+
+    function makeCalendarEvent(day, time, title, durationMinutes, description) {
+      const date = nextOccurrence(day, time);
+      const end = minutesToTime(timeToMinutes(time) + durationMinutes);
+      const uid = `${dateKey(date)}-${time.replace(":", "")}-${title}-${day}@personal-rhythm`;
+      const dayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+      const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+
+      return [
+        "BEGIN:VEVENT",
+        `UID:${uid}`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART:${icsDate(date, time)}`,
+        `DTEND:${icsDate(date, end)}`,
+        `RRULE:FREQ=WEEKLY;BYDAY=${dayCodes[day]}`,
+        `SUMMARY:${escapeIcs(title)}`,
+        `DESCRIPTION:${escapeIcs(description)}`,
+        "BEGIN:VALARM",
+        "TRIGGER:PT0M",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:${escapeIcs(title)}`,
+        "END:VALARM",
+        "END:VEVENT"
+      ].join("\r\n");
+    }
+
+    function buildCalendarFile() {
+      const profile = state.profile;
+      const events = [];
+      const addEvent = (day, time, title, duration, description) => {
+        events.push(makeCalendarEvent(day, time, title, duration, description));
+      };
+
+      for (let day = 0; day <= 6; day += 1) {
+        addEvent(day, profile.wakeTime, "起床，补水并整理床铺", 20, "猫咪照护统一在晚间完成。");
+
+        if (day >= 1 && day <= 5) {
+          addEvent(day, profile.academicStart, "上午学业深度块", 210, "到 11:30 结束。");
+          addEvent(day, "11:30", "午餐与午休", 180, "11:30 至 14:30 不安排任务、学习或运动。");
+          addEvent(day, "14:30", "下午学业深度块", 120, "处理当天最难的研究任务。");
+          addEvent(day, "16:30", "学业收尾", 60, "邮件、文献、材料与明日准备。");
+          addEvent(day, "17:30", "下班，换衣服，检查快递", 15, "有快递则顺路取件。");
+
+          if ([1, 3, 5].includes(day)) {
+            addEvent(day, shiftTime(profile.homeTime, 15), `${getSportName([1, 3, 5].indexOf(day))}训练`, 60, "经期休息日以应用内勾选为准。");
+          }
+          if (getLaundryDefault(day)) {
+            addEvent(day, shiftTime(profile.homeTime, day === 2 ? 60 : 165), "洗衣服并晾晒", 30, "只处理一桶衣物。");
+          }
+        } else if (day === 6) {
+          addEvent(day, "09:30", "周末论文大块推进", 120, "到午餐前完成可评价产出。");
+          addEvent(day, "11:30", "午餐与午休", 180, "11:30 至 14:30 不安排任务。");
+          if ([1, 3, 5, 6].includes(day)) {
+            addEvent(day, "14:30", "周末运动", 75, "游泳或网球，经期则取消。");
+          }
+          addEvent(day, "16:30", "全屋清洁", 60, "按区域完成，不重新整理所有物品。");
+          if (getLaundryDefault(day)) {
+            addEvent(day, "19:30", "洗衣服、晾晒并收好", 30, "和其他家务分开处理。");
+          }
+        } else {
+          addEvent(day, "10:00", "周复盘与下周目标", 60, "最多三个可验证目标。");
+          addEvent(day, "11:30", "午餐与午休", 180, "11:30 至 14:30 不安排任务。");
+          addEvent(day, "16:00", "备餐与下周准备", 60, "降低工作日临时决策。");
+          if (getLaundryDefault(day)) {
+            addEvent(day, "19:00", "洗衣服、晾晒并收好", 30, "与其他家务分开处理。");
+          }
+        }
+
+        addEvent(day, "21:10", "晚间猫咪照护", 20, "统一完成喂食、补水和清理猫砂。");
+        addEvent(day, "21:30", "洗漱与收尾", 40, "关闭高强度脑力活动。");
+        addEvent(day, profile.sleepTime, "上床，目标入睡", 15, "睡眠不作为惩罚额度。");
+      }
+
+      return [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Personal Rhythm//CN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:个人节律基础提醒",
+        "X-WR-TIMEZONE:Asia/Shanghai",
+        ...events,
+        "END:VCALENDAR"
+      ].join("\r\n");
+    }
+
+    function downloadCalendar() {
+      const blob = new Blob([buildCalendarFile()], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "生活节律-手机提醒.ics";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      updateNotificationStatus("日历文件已生成，请在手机上导入日历");
+    }
+
+    async function installApp() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        return;
+      }
+      updateNotificationStatus("请从浏览器菜单选择“安装应用”或“添加到主屏幕”");
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `personal-rhythm-${dateKey(new Date())}.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetData() {
+      const confirmed = window.confirm("将清空个人资料和全部记录。确定继续吗？");
+      if (!confirmed) {
+        return;
+      }
+      localStorage.removeItem(STORAGE_KEY);
+      state = clone(DEFAULT_STATE);
+      selectedDateKey = dateKey(new Date());
+      renderAll();
+    }
+
+    const profileFields = [
+      elements.currentWeight,
+      elements.targetWeight,
+      elements.height,
+      elements.workoutDays,
+      elements.sportTennis,
+      elements.sportSwim,
+      elements.wakeTime,
+      elements.sleepTime,
+      elements.freeTime,
+      elements.homeTime,
+      elements.academicStart,
+      elements.academicPriority,
+      elements.cookingDays,
+      elements.catCount,
+      elements.laundryDays,
+      elements.periodDaysPerMonth,
+      elements.monthlyBudget
+    ];
+
+    profileFields.forEach((field) => {
+      field.addEventListener("change", updateProfileFromInputs);
+      field.addEventListener("input", () => {
+        if (field.type === "number" || field.type === "time") {
+          updateProfileFromInputs();
+        }
+      });
+    });
+
+    document.getElementById("generatePlan").addEventListener("click", () => {
+      updateProfileFromInputs();
+      renderAll();
+    });
+
+    elements.selectedDate.addEventListener("change", () => {
+      selectedDateKey = elements.selectedDate.value || dateKey(new Date());
+      renderToday();
+      renderWeek();
+      renderRecords();
+      renderGamification();
+    });
+
+    function setDayOption(field, value) {
+      state.dayOptions[selectedDateKey] = {
+        ...getDayOptions(selectedDateKey),
+        [field]: value
+      };
+      saveState();
+      renderToday();
+      renderWeek();
+    }
+
+    elements.packagePickup.addEventListener("change", () => {
+      setDayOption("packagePickup", elements.packagePickup.checked);
+    });
+
+    elements.laundryToday.addEventListener("change", () => {
+      setDayOption("laundry", elements.laundryToday.checked);
+    });
+
+    elements.periodRest.addEventListener("change", () => {
+      setDayOption("periodRest", elements.periodRest.checked);
+    });
+
+    elements.scheduleList.addEventListener("change", (event) => {
+      const checkbox = event.target.closest("input[data-task-id]");
+      if (!checkbox) {
+        return;
+      }
+      const task = generatePlan(selectedDateKey).find((item) => item.id === checkbox.dataset.taskId);
+      const metGoalBefore = isDayGoalMet(selectedDateKey);
+      if (!state.completed[selectedDateKey]) {
+        state.completed[selectedDateKey] = {};
+      }
+      if (!state.taskPoints[selectedDateKey]) {
+        state.taskPoints[selectedDateKey] = {};
+      }
+      state.completed[selectedDateKey][checkbox.dataset.taskId] = checkbox.checked;
+      if (checkbox.checked && task) {
+        state.taskPoints[selectedDateKey][checkbox.dataset.taskId] = getTaskPoints(task);
+      } else {
+        delete state.taskPoints[selectedDateKey][checkbox.dataset.taskId];
+      }
+      saveState();
+      renderToday();
+      if (!metGoalBefore && isDayGoalMet(selectedDateKey)) {
+        showToast("今日目标完成。连续坚持记录已更新。");
+        sendNotification("今日目标完成", `获得 ${pointsForDay(selectedDateKey)} XP，继续保持节奏。`, `goal-${selectedDateKey}`);
+      }
+    });
+
+    document.querySelector(".tabs").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-view]");
+      if (!button) {
+        return;
+      }
+      document.querySelectorAll(".tabs button").forEach((item) => item.classList.toggle("active", item === button));
+      document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
+      const selected = document.getElementById(`view-${button.dataset.view}`);
+      if (selected) {
+        selected.classList.add("active");
+      }
+    });
+
+    document.getElementById("saveDailyRecord").addEventListener("click", saveDailyRecord);
+    document.getElementById("addExpense").addEventListener("click", addExpense);
+    document.getElementById("saveOutcome").addEventListener("click", () => {
+      state.outcomes[selectedDateKey] = elements.topOutcome.value.trim();
+      saveState();
+      elements.topOutcome.value = state.outcomes[selectedDateKey];
+    });
+    document.getElementById("exportData").addEventListener("click", exportData);
+    document.getElementById("enableNotifications").addEventListener("click", enableNotifications);
+    document.getElementById("downloadCalendar").addEventListener("click", downloadCalendar);
+    document.getElementById("installApp").addEventListener("click", installApp);
+    document.getElementById("resetData").addEventListener("click", resetData);
+    document.getElementById("printPlan").addEventListener("click", () => window.print());
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      updateNotificationStatus("可以安装到手机主屏");
+    });
+
+    window.addEventListener("appinstalled", () => {
+      updateNotificationStatus("已安装到主屏");
+      deferredInstallPrompt = null;
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        checkDueReminders();
+      }
+    });
+
+    renderAll();
+    if (!TEST_MODE) {
+      registerAppServiceWorker().then(() => {
+        if ("Notification" in window && Notification.permission === "granted") {
+          updateNotificationStatus("系统通知已开启");
+        } else if (location.protocol === "file:") {
+          updateNotificationStatus("请通过 HTTPS 或 localhost 安装并开启通知");
+        }
+      });
+      window.setInterval(checkDueReminders, 60000);
+      checkDueReminders();
+    }
+  </script>
+</body>
+</html>
